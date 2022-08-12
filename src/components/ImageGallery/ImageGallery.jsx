@@ -1,5 +1,5 @@
 import css from './ImageGallery.module.css';
-import { Component } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 
 import {
@@ -10,164 +10,123 @@ import {
   Loader,
   Modal,
 } from 'components';
-export class Gallery extends Component {
-  api = new ApiService();
-  modalEl = document.querySelector('#modal-root');
 
-  state = {
-    images: [],
-    searchQuery: '',
-    page: 1,
-    // loading: false,
-    showBtn: true,
-    modalImg: '',
-    isOpen: false,
-    // noImgError: false,
-    error: false,
-    status: 'idle',
-  };
+export const Gallery = () => {
+  const api = new ApiService();
+  const modalEl = document.querySelector('#modal-root');
+  const supRef = useRef(true);
 
-  componentDidUpdate(prevProps, prevState) {
-    const { searchQuery, page, images } = this.state;
-    if (prevState.searchQuery !== searchQuery || prevState.page !== page) {
-      this.setState({ status: 'loading' });
-      this.api
-        .getImg(searchQuery, page)
-        .then(data => {
-          if (data.totalHits === 0) {
-            this.setState({ status: 'noImg' });
-            return;
-          }
+  const [images, setImages] = useState([]);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [page, setPage] = useState(1);
+  const [showBtn, setShowBtn] = useState(true);
+  const [modalImg, setModalImg] = useState('');
+  const [isOpen, setIsOpen] = useState(false);
+  const [error, setError] = useState(false);
+  const [status, setStatus] = useState('idle');
 
-          this.setState(prevState => ({
-            images: [...prevState.images, ...data.hits],
-            showBtn: !(data.totalHits === images.length),
-            status: 'resolved',
-          }));
-        })
-        .catch(error =>
-          this.setState({
-            error: error.message,
-            status: 'error',
-          })
-        );
-    }
-  }
-
-  onSubmit = data => {
-    if (data === '') {
-      this.setState({ status: 'emptySearch' });
+  useEffect(() => {
+    if (supRef.current === true) {
+      supRef.current = false;
       return;
     }
-    this.setState({
-      searchQuery: data,
-      // loading: true,
-      images: [],
-      page: 1,
-      // noImgError: false,
-      error: false,
-      showBtn: true,
-    });
-  };
 
-  loadMore = () => {
-    this.setState(prevState => ({ page: prevState.page + 1 }));
-  };
+    setStatus('loading');
+    api
+      .getImg(searchQuery, page)
+      .then(data => {
+        if (data.totalHits === 0) {
+          setStatus('noImg');
+          return;
+        }
+        setImages(prevState => [...prevState, ...data.hits]);
+        setShowBtn(!(data.totalHits === images.length));
+        setStatus('resolved');
+      })
+      .catch(error => {
+        setError(error.message);
+        setStatus('error');
+      });
+  }, [searchQuery, page]);
 
-  clickImgHandler = data => {
-    this.setState({
-      modalImg: data,
-      isOpen: true,
-    });
-  };
-
-  closeModal = () => {
-    this.setState({
-      isOpen: false,
-    });
-  };
-
-  render() {
-    const {
-      images,
-      // loading,
-      isOpen,
-      modalImg,
-      // noImgError,
-      error,
-      showBtn,
-      status,
-    } = this.state;
-
-    let paragraph;
-
-    if (status === 'idle') {
-      paragraph = (
-        <p className={css.galleryText}>Hello try to find some images</p>
-      );
-    } else if (status === 'loading') {
-      paragraph = (
-        <span className={css.galleryText}>
-          <Loader />
-        </span>
-      );
-    } else if (status === 'noImg') {
-      paragraph = (
-        <p className={css.galleryText}>There is no images for this query</p>
-      );
-    } else if (status === 'error') {
-      paragraph = (
-        <p className={css.galleryText}>
-          Something went wrong. Please try again later. Error description:
-          {error}
-        </p>
-      );
-    } else if (status === 'emptySearch') {
-      paragraph = <p className={css.galleryText}>Please enter your query.</p>;
+  const onSubmit = data => {
+    if (data === '') {
+      setStatus('emptySearch');
+      return;
+    } else {
+      setSearchQuery(data);
+      setImages([]);
+      setPage(1);
+      setError(false);
+      setShowBtn(true);
     }
+  };
 
-    return (
-      <>
-        <SearchBar onSubmit={this.onSubmit} />
-        {paragraph}
+  const loadMore = () => {
+    setPage(prevState => prevState + 1);
+  };
 
-        {/* {!noImgError && !loading && images.length === 0 && (
-          <p className={css.galleryText}>Hello try to find some images</p>
-        )}
-        {noImgError && (
-          <p className={css.galleryText}>There is no images for this query</p>
-        )}
-        {error && (
-          <p className={css.galleryText}>
-            Something went wrong. Please try again later {error}
-          </p>
-        )}
-        {loading && (
-          <span className={css.galleryText}>
-            <Loader visible={loading} />
-          </span>
-        )} */}
-        <ul className={css.ImageGallery}>
-          {images.map(({ id, webformatURL, largeImageURL }) => (
-            <GalleryItem
-              key={id}
-              webUrl={webformatURL}
-              largeImageURL={largeImageURL}
-              onClick={this.clickImgHandler}
-            />
-          ))}
-        </ul>
-        {showBtn && status === 'resolved' && (
-          <span className={css.galleryText}>
-            <Button disabled={status === 'loading'} onClick={this.loadMore} />
-          </span>
-        )}
+  const clickImgHandler = data => {
+    setModalImg(data);
+    setIsOpen(true);
+  };
 
-        {createPortal(
-          isOpen && <Modal modalImg={modalImg} onClose={this.closeModal} />,
-          this.modalEl
-        )}
-      </>
+  const closeModal = () => {
+    setIsOpen(false);
+  };
+
+  let paragraph;
+
+  if (status === 'idle') {
+    paragraph = (
+      <p className={css.galleryText}>Hello try to find some images</p>
     );
+  } else if (status === 'loading') {
+    paragraph = (
+      <span className={css.galleryText}>
+        <Loader />
+      </span>
+    );
+  } else if (status === 'noImg') {
+    paragraph = (
+      <p className={css.galleryText}>There is no images for this query</p>
+    );
+  } else if (status === 'error') {
+    paragraph = (
+      <p className={css.galleryText}>
+        Something went wrong. Please try again later. Error description:
+        {error}
+      </p>
+    );
+  } else if (status === 'emptySearch') {
+    paragraph = <p className={css.galleryText}>Please enter your query.</p>;
   }
-}
+
+  return (
+    <>
+      <SearchBar onSubmit={onSubmit} />
+      {paragraph}
+
+      <ul className={css.ImageGallery}>
+        {images.map(({ id, webformatURL, largeImageURL }) => (
+          <GalleryItem
+            key={id}
+            webUrl={webformatURL}
+            largeImageURL={largeImageURL}
+            onClick={clickImgHandler}
+          />
+        ))}
+      </ul>
+      {showBtn && status === 'resolved' && (
+        <span className={css.galleryText}>
+          <Button disabled={status === 'loading'} onClick={loadMore} />
+        </span>
+      )}
+
+      {createPortal(
+        isOpen && <Modal modalImg={modalImg} onClose={closeModal} />,
+        modalEl
+      )}
+    </>
+  );
+};

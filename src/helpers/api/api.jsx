@@ -7,7 +7,7 @@ export class ApiService {
       `${this.BASE_URL}?q=${query}&page=${page}&key=${this.KEY}&image_type=photo&orientation=horizontal&per_page=12`
     );
     if (!response.ok) {
-      return new Error(`could not feth ${response.status}`);
+      return new Error(`could not fetch ${response.status}`);
     }
     return response.json();
   }
