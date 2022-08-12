@@ -7,6 +7,8 @@ export class SearchBar extends Component {
     query: '',
   };
 
+  // console.log(this.state);
+
   inputChangeHandler = e => {
     this.setState({ query: e.currentTarget.value });
   };
