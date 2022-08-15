@@ -1,6 +1,6 @@
 import css from './ImageGallery.module.css';
 import { useState, useEffect, useRef } from 'react';
-// import { createPortal } from 'react-dom';
+import { createPortal } from 'react-dom';
 
 import {
   ApiService,
@@ -122,11 +122,11 @@ export const Gallery = () => {
           <Button disabled={status === 'loading'} onClick={loadMore} />
         </span>
       )}
-      {/* 
+
       {createPortal(
         isOpen && <Modal modalImg={modalImg} onClose={closeModal} />,
         modalEl
-      )} */}
+      )}
     </>
   );
 };
