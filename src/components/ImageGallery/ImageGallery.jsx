@@ -13,17 +13,18 @@ import {
 
 export const Gallery = () => {
   const api = new ApiService();
+
   const modalEl = document.querySelector('#modal-root');
   const supRef = useRef(true);
 
   const [images, setImages] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [page, setPage] = useState(1);
-  const [showBtn, setShowBtn] = useState(true);
   const [modalImg, setModalImg] = useState('');
   const [isOpen, setIsOpen] = useState(false);
   const [error, setError] = useState(false);
   const [status, setStatus] = useState('idle');
+  const [totalHits, setTotalHits] = useState(0);
 
   useEffect(() => {
     if (supRef.current === true) {
@@ -40,7 +41,7 @@ export const Gallery = () => {
           return;
         }
         setImages(prevState => [...prevState, ...data.hits]);
-        setShowBtn(!(data.totalHits === images.length));
+        setTotalHits(data.totalHits);
         setStatus('resolved');
       })
       .catch(error => {
@@ -58,7 +59,7 @@ export const Gallery = () => {
       setImages([]);
       setPage(1);
       setError(false);
-      setShowBtn(true);
+      setTotalHits(0);
     }
   };
 
@@ -75,6 +76,7 @@ export const Gallery = () => {
     setIsOpen(false);
   };
 
+  let showBtn = !(images.length === totalHits);
   let paragraph;
 
   if (status === 'idle') {
