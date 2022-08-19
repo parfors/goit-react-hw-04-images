@@ -1,9 +1,8 @@
 import css from './ImageGallery.module.css';
 import { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
-
 import {
-  ApiService,
+  getImg,
   GalleryItem,
   SearchBar,
   Button,
@@ -12,7 +11,7 @@ import {
 } from 'components';
 
 export const Gallery = () => {
-  const api = new ApiService();
+  // const api = new ApiService();
 
   const modalEl = document.querySelector('#modal-root');
   const supRef = useRef(true);
@@ -33,8 +32,7 @@ export const Gallery = () => {
     }
 
     setStatus('loading');
-    api
-      .getImg(searchQuery, page)
+    getImg(searchQuery, page)
       .then(data => {
         if (data.totalHits === 0) {
           setStatus('noImg');
