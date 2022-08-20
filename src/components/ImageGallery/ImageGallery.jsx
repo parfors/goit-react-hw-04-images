@@ -11,8 +11,6 @@ import {
 } from 'components';
 
 export const Gallery = () => {
-  // const api = new ApiService();
-
   const modalEl = document.querySelector('#modal-root');
   const supRef = useRef(true);
 
@@ -51,6 +49,8 @@ export const Gallery = () => {
   const onSubmit = data => {
     if (data === '') {
       setStatus('emptySearch');
+      setImages([]);
+
       return;
     } else {
       setSearchQuery(data);
@@ -105,7 +105,6 @@ export const Gallery = () => {
   return (
     <>
       <SearchBar onSubmit={onSubmit} />
-      {paragraph}
 
       <ul className={css.ImageGallery}>
         {images.map(({ id, webformatURL, largeImageURL }) => (
@@ -117,6 +116,7 @@ export const Gallery = () => {
           />
         ))}
       </ul>
+      {paragraph}
       {showBtn && status === 'resolved' && (
         <span className={css.galleryText}>
           <Button disabled={status === 'loading'} onClick={loadMore} />

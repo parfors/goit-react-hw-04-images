@@ -10,16 +10,3 @@ export const getImg = async (query, page) => {
   }
   return response.json();
 };
-
-// async getFitData(query) {
-//   const response = await this.getImg(query);
-//   console.log(response);
-//   const fitData = response.hits.map(el => this.formatData(el));
-//   return fitData;
-// }
-
-// formatData = element => ({
-//   id: element.id,
-//   webformatURL: element.webformatURL,
-//   largeImageURL: element.largeImageURL,
-// });

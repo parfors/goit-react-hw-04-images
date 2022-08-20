@@ -6,8 +6,7 @@ export const SearchBar = ({ onSubmit }) => {
   const [query, setQuery] = useState('');
 
   const inputChangeHandler = e => {
-    setQuery(e.target.value);
-    // this.setState({ query: e.currentTarget.value });
+    setQuery(e.target.value.trim());
   };
 
   const submitHandler = e => {
